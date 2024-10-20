@@ -12,12 +12,14 @@ app.use(helmet());
 app.use(express.json());
 
 // Database Connection
-sequelize.sync().then(() => {
-  console.log('PostgreSQL connected');
+sequelize.sync({ alter: true }).then(() => {
+  console.log('PostgreSQL connected and tables updated');
 }).catch(err => console.error('PostgreSQL connection error:', err));
 
 // Routes
 app.use('/api/users', require('./routes/users'));
+app.use('/api/projects', require('./routes/projects'));
+app.use('/api/tasks', require('./routes/tasks'));
 
 // Basic route for testing
 app.get('/', (req, res) => {
