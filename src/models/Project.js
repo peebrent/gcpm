@@ -20,6 +20,10 @@ const Project = sequelize.define('Project', {
   endDate: {
     type: DataTypes.DATE,
   },
+  imageUrl: {  // Add this new field
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
 });
 
 // Define the relationship

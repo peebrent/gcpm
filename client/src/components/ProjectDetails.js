@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Typography, Container, List, ListItem, ListItemText, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, IconButton } from '@mui/material';
+import { Typography, Container, List, ListItem, ListItemText, Button, Dialog, DialogTitle, DialogContent, DialogActions, TextField, IconButton, Input } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 const ProjectDetails = ({ token }) => {
@@ -9,6 +9,7 @@ const ProjectDetails = ({ token }) => {
   const [tasks, setTasks] = useState([]);
   const [open, setOpen] = useState(false);
   const [newTask, setNewTask] = useState({ title: '', description: '', status: 'To Do' });
+  const [selectedFile, setSelectedFile] = useState(null);
   const { projectId } = useParams();
   const navigate = useNavigate();
 
@@ -64,6 +65,32 @@ const ProjectDetails = ({ token }) => {
     navigate('/projects');
   };
 
+  const handleFileSelect = (event) => {
+    setSelectedFile(event.target.files[0]);
+  };
+
+  const handleUpload = async () => {
+    if (!selectedFile) {
+      alert('Please select a file first!');
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('image', selectedFile);
+
+    try {
+      const response = await axios.post(`/api/projects/${projectId}/image`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          'x-auth-token': token
+        },
+      });
+      setProject({ ...project, imageUrl: response.data.imageUrl });
+    } catch (error) {
+      console.error('Error uploading image:', error);
+    }
+  };
+
   if (!project) {
     return <Typography>Loading...</Typography>;
   }
@@ -79,6 +106,19 @@ const ProjectDetails = ({ token }) => {
       <Typography variant="body1" gutterBottom>
         {project.description}
       </Typography>
+      
+      {/* Image Upload Section */}
+      <Typography variant="h6" component="h3" gutterBottom style={{ marginTop: '20px' }}>
+        Project Image
+      </Typography>
+      {project.imageUrl && (
+        <img src={project.imageUrl} alt="Project" style={{ maxWidth: '100%', marginBottom: '20px' }} />
+      )}
+      <Input type="file" onChange={handleFileSelect} style={{ marginBottom: '10px' }} />
+      <Button onClick={handleUpload} variant="contained" color="primary" style={{ marginBottom: '20px' }}>
+        Upload Image
+      </Button>
+
       <Typography variant="h5" component="h3" gutterBottom style={{ marginTop: '20px' }}>
         Tasks
       </Typography>

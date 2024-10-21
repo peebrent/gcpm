@@ -3,19 +3,33 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const { sequelize } = require('./config/database');
+const multer = require('multer');
 const projectRoutes = require('./routes/projects');
+const path = require('path');
+const uploadRoutes = require('./routes/upload');
 const app = express();
 const authRoutes = require('./routes/auth');
 console.log('JWT_SECRET:', process.env.JWT_SECRET);
 // Middleware
 
-app.use(cors({
-  origin: 'http://localhost:3000', // Allow requests from your React app
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'x-auth-token']
-}));
+app.use(cors());
 app.use(helmet());
 app.use(express.json());
+
+// Set up multer for file uploads
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/') // Make sure this folder exists
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + path.extname(file.originalname))
+  }
+});
+
+const upload = multer({ storage: storage });
+
+// Serve uploaded files
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Check for JWT_SECRET
 if (!process.env.JWT_SECRET) {
@@ -34,6 +48,8 @@ app.use('/api/projects', require('./routes/projects'));
 app.use('/api/projects', projectRoutes);
 app.use('/api/tasks', require('./routes/tasks'));
 app.use('/api/auth', authRoutes);
+app.use('/api/upload', uploadRoutes);
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Basic route for testing
 app.get('/', (req, res) => {

@@ -67,7 +67,6 @@ const ProjectList = ({ token }) => {
 
   const handleCreate = async () => {
     try {
-      console.log('Attempting to create project:', newProject);
       const response = await api.post('/api/projects', newProject, {
         headers: { 'x-auth-token': token }
       });
@@ -78,6 +77,15 @@ const ProjectList = ({ token }) => {
       setOpenSnackbar(true);
     } catch (error) {
       console.error('Failed to create project:', error);
+      if (error.response) {
+        console.error('Error data:', error.response.data);
+        console.error('Error status:', error.response.status);
+        console.error('Error headers:', error.response.headers);
+      } else if (error.request) {
+        console.error('Error request:', error.request);
+      } else {
+        console.error('Error message:', error.message);
+      }
       setMessage({ text: `Failed to create project: ${error.response ? error.response.data.msg : error.message}`, severity: 'error' });
       setOpenSnackbar(true);
     }
