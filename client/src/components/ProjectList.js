@@ -1,29 +1,41 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import { 
-  List, 
-  ListItem, 
-  ListItemText, 
-  ListItemSecondaryAction, 
-  IconButton, 
-  Typography, 
-  Container, 
-  Button, 
-  Dialog, 
-  DialogTitle, 
-  DialogContent, 
-  DialogActions, 
-  TextField, 
-  Snackbar 
+  Container,
+  Typography,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Grid,
+  Card,
+  CardContent,
+  CardActions,
+  IconButton,
+  Chip,
+  Box,
+  Snackbar,
+  List,
+  ListItem,
+  ListItemText,
+  Divider,
+  Paper
 } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SearchIcon from '@mui/icons-material/Search';
+import AddIcon from '@mui/icons-material/Add';
 import MuiAlert from '@mui/material/Alert';
-import { useNavigate } from 'react-router-dom';
-
+import ViewListIcon from '@mui/icons-material/ViewList';
+import GridViewIcon from '@mui/icons-material/GridView';
+import ToggleButton from '@mui/material/ToggleButton';
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
 const api = axios.create({
-  baseURL: 'http://localhost:50001'  // Use your actual backend URL
+  baseURL: 'http://localhost:50001'
 });
 
 const Alert = React.forwardRef(function Alert(props, ref) {
@@ -31,13 +43,15 @@ const Alert = React.forwardRef(function Alert(props, ref) {
 });
 
 const ProjectList = ({ token }) => {
+  const theme = useTheme();
+  const navigate = useNavigate();
   const [projects, setProjects] = useState([]);
   const [open, setOpen] = useState(false);
   const [newProject, setNewProject] = useState({ name: '', description: '' });
   const [message, setMessage] = useState({ text: '', severity: 'success' });
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const navigate = useNavigate();
+  const [viewMode, setViewMode] = useState('grid');
 
   useEffect(() => {
     fetchProjects();
@@ -53,6 +67,12 @@ const ProjectList = ({ token }) => {
       console.error('Failed to fetch projects:', error);
       setMessage({ text: 'Failed to fetch projects. Please try again.', severity: 'error' });
       setOpenSnackbar(true);
+    }
+  };
+
+  const handleViewModeChange = (event, newMode) => {
+    if (newMode !== null) {
+      setViewMode(newMode);
     }
   };
 
@@ -91,9 +111,10 @@ const ProjectList = ({ token }) => {
     }
   };
 
-  const handleDelete = async (projectId) => {
+  const handleDelete = async (projectId, event) => {
+    event.stopPropagation();
     try {
-      await axios.delete(`/api/projects/${projectId}`, {
+      await api.delete(`/api/projects/${projectId}`, {
         headers: { 'x-auth-token': token }
       });
       fetchProjects();
@@ -123,10 +144,22 @@ const ProjectList = ({ token }) => {
   );
 
   return (
-    <Container>
-      <Typography variant="h4" component="h2" gutterBottom>
-        Projects
-      </Typography>
+    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+        <Typography variant="h4" component="h1">
+          Projects
+        </Typography>
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={<AddIcon />}
+          onClick={handleClickOpen}
+          sx={{ borderRadius: '8px' }}
+        >
+          New Project
+        </Button>
+      </Box>
+
       <TextField
         fullWidth
         variant="outlined"
@@ -138,60 +171,147 @@ const ProjectList = ({ token }) => {
         }}
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
-        style={{ marginBottom: '20px' }}
+        sx={{ mb: 3 }}
       />
-      <Button variant="contained" color="primary" onClick={handleClickOpen} style={{ marginBottom: '20px' }}>
-        Create New Project
-      </Button>
-      <List>
-        {filteredProjects.map(project => (
-          <ListItem key={project.id} button onClick={() => handleProjectClick(project.id)}>
-            <ListItemText primary={project.name} secondary={project.description} />
-            <ListItemSecondaryAction>
-              <IconButton edge="end" aria-label="delete" onClick={(e) => {
-                e.stopPropagation();
-                handleDelete(project.id);
-              }}>
-                <DeleteIcon />
-              </IconButton>
-            </ListItemSecondaryAction>
+
+      <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
+        <ToggleButtonGroup
+          value={viewMode}
+          exclusive
+          onChange={handleViewModeChange}
+          aria-label="view mode"
+          size="small"
+        >
+          <ToggleButton value="grid" aria-label="grid view">
+            <GridViewIcon />
+          </ToggleButton>
+          <ToggleButton value="list" aria-label="list view">
+            <ViewListIcon />
+          </ToggleButton>
+        </ToggleButtonGroup>
+      </Box>
+
+      {/* Replace your existing projects display with this conditional rendering */}
+{viewMode === 'grid' ? (
+  <Grid container spacing={3}>
+    {filteredProjects.map(project => (
+      <Grid item xs={12} md={6} lg={4} key={project.id}>
+        <Card 
+          sx={{ 
+            height: '100%', 
+            display: 'flex', 
+            flexDirection: 'column',
+            '&:hover': {
+              boxShadow: 6,
+              cursor: 'pointer'
+            }
+          }}
+          onClick={() => handleProjectClick(project.id)}
+        >
+          <CardContent sx={{ flexGrow: 1 }}>
+            <Typography variant="h6" component="h2" gutterBottom>
+              {project.name}
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              {project.description}
+            </Typography>
+            {project.status && (
+              <Chip 
+                label={project.status} 
+                size="small"
+                color="primary"
+              />
+            )}
+          </CardContent>
+          <CardActions sx={{ justifyContent: 'flex-end' }}>
+            <IconButton 
+              size="small" 
+              onClick={(e) => handleDelete(project.id, e)}
+            >
+              <DeleteIcon />
+            </IconButton>
+          </CardActions>
+        </Card>
+      </Grid>
+    ))}
+  </Grid>
+) : (
+  <Paper elevation={2}>
+    <List>
+      {filteredProjects.map(project => (
+        <React.Fragment key={project.id}>
+          <ListItem 
+            button
+            onClick={() => handleProjectClick(project.id)}
+            sx={{
+              '&:hover': {
+                backgroundColor: 'rgba(0, 0, 0, 0.04)'
+              }
+            }}
+          >
+            <ListItemText 
+              primary={
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <Typography variant="subtitle1">
+                    {project.name}
+                  </Typography>
+                  {project.status && (
+                    <Chip 
+                      label={project.status} 
+                      size="small"
+                      color="primary"
+                    />
+                  )}
+                </Box>
+              }
+              secondary={project.description}
+            />
+            <IconButton 
+              edge="end" 
+              aria-label="delete" 
+              onClick={(e) => handleDelete(project.id, e)}
+            >
+              <DeleteIcon />
+            </IconButton>
           </ListItem>
-        ))}
-      </List>
-      <Dialog open={open} onClose={handleClose}>
+          <Divider />
+        </React.Fragment>
+      ))}
+    </List>
+  </Paper>
+)}
+
+      <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
         <DialogTitle>Create New Project</DialogTitle>
-        <DialogContent>
+        <DialogContent sx={{ pt: 2 }}>
           <TextField
             autoFocus
-            margin="dense"
-            id="name"
             label="Project Name"
-            type="text"
             fullWidth
+            required
             value={newProject.name}
             onChange={(e) => setNewProject({ ...newProject, name: e.target.value })}
+            sx={{ mb: 2 }}
           />
           <TextField
-            margin="dense"
-            id="description"
-            label="Project Description"
-            type="text"
+            label="Description"
             fullWidth
+            multiline
+            rows={3}
             value={newProject.description}
             onChange={(e) => setNewProject({ ...newProject, description: e.target.value })}
           />
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleCreate} color="primary">
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <Button onClick={handleClose}>Cancel</Button>
+          <Button onClick={handleCreate} variant="contained" color="primary">
             Create
           </Button>
         </DialogActions>
       </Dialog>
+
       <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={handleCloseSnackbar}>
-        <Alert onClose={handleCloseSnackbar} severity={message.severity} sx={{ width: '100%' }}>
+        <Alert onClose={handleCloseSnackbar} severity={message.severity}>
           {message.text}
         </Alert>
       </Snackbar>
