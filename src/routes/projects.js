@@ -1,15 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const { Project } = require('../models/Project');
-const auth = require('../middleware/auth');
+// const auth = require('../middleware/auth');
 const multer = require('multer');
 const path = require('path');
 
-// Add this new route to get all projects for the authenticated user
-router.get('/', auth, async (req, res) => {
+// Get all projects
+router.get('/', async (req, res) => {  // Removed auth
   try {
     const projects = await Project.findAll({
-      where: { ownerId: req.user.id },
       order: [['createdAt', 'DESC']] // Optional: Order by creation date, newest first
     });
     res.json(projects);
@@ -20,10 +19,10 @@ router.get('/', auth, async (req, res) => {
 });
 
 // Get a single project by ID
-router.get('/:id', auth, async (req, res) => {
+router.get('/:id', async (req, res) => {  // Removed auth
   try {
     const project = await Project.findOne({
-      where: { id: req.params.id, ownerId: req.user.id },
+      where: { id: req.params.id },  // Removed ownerId check
     });
     if (!project) {
       return res.status(404).json({ msg: 'Project not found' });
@@ -36,10 +35,10 @@ router.get('/:id', auth, async (req, res) => {
 });
 
 // Update a project
-router.put('/:id', auth, async (req, res) => {
+router.put('/:id', async (req, res) => {
   try {
     let project = await Project.findOne({
-      where: { id: req.params.id, ownerId: req.user.id },
+      where: { id: req.params.id },  // Removed ownerId check
     });
     if (!project) {
       return res.status(404).json({ msg: 'Project not found' });
@@ -51,7 +50,7 @@ router.put('/:id', auth, async (req, res) => {
       status,
       startDate,
       endDate,
-      imageUrl, // Add this line to include imageUrl in the update
+      imageUrl,
     });
     res.json(project);
   } catch (err) {
@@ -60,7 +59,8 @@ router.put('/:id', auth, async (req, res) => {
   }
 });
 
-router.post('/', auth, async (req, res) => {
+// Create a new project
+router.post('/', async (req, res) => {  // Removed auth
   try {
     const { name, description, status, startDate, endDate } = req.body;
     
@@ -68,7 +68,7 @@ router.post('/', auth, async (req, res) => {
       return res.status(400).json({ msg: 'Project name is required' });
     }
 
-    console.log('Creating project with data:', { name, description, status, startDate, endDate, ownerId: req.user.id });
+    console.log('Creating project with data:', { name, description, status, startDate, endDate });
 
     const project = await Project.create({
       name,
@@ -76,7 +76,7 @@ router.post('/', auth, async (req, res) => {
       status,
       startDate,
       endDate,
-      ownerId: req.user.id,
+      ownerId: 1,  // Hardcoded for testing
     });
 
     console.log('Project created successfully:', project);
@@ -101,10 +101,10 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 // Route to handle image upload for a project
-router.post('/:id/image', auth, upload.single('image'), async (req, res) => {
+router.post('/:id/image', upload.single('image'), async (req, res) => {  // Removed auth
   try {
     const project = await Project.findOne({
-      where: { id: req.params.id, ownerId: req.user.id },
+      where: { id: req.params.id },  // Removed ownerId check
     });
 
     if (!project) {
