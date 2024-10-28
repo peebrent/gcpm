@@ -28,6 +28,7 @@ import { useTheme } from '@mui/material/styles';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import AddIcon from '@mui/icons-material/Add';
 import MuiAlert from '@mui/material/Alert';
+import Sidebar from './Sidebar';
 
 const Alert = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
@@ -150,220 +151,250 @@ const ProjectDetails = ({ token }) => {
     return colors[status] || theme.palette.primary.main;
   };
 
+  const handleSidebarNavigate = (route) => {
+    console.log(`Navigating to: ${route}`);
+  };
+
   if (!project) {
     return (
-      <Container maxWidth="lg" sx={{ mt: 4 }}>
-        <Typography>Loading...</Typography>
-      </Container>
+      <Box sx={{ ml: '150px', mt: '48px' }}>
+        <Container maxWidth="lg">
+          <Typography>Loading...</Typography>
+        </Container>
+      </Box>
     );
   }
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
-        <IconButton 
-          onClick={handleBack} 
-          sx={{ mr: 2 }}
-          color="inherit"
-        >
-          <ArrowBackIcon />
-        </IconButton>
-        <Typography variant="h4" component="h1">
-          {project.name}
-        </Typography>
+    <Box sx={{ display: 'flex', minHeight: '100%', position: 'relative'  }}>
+      {/* Sidebar */}
+      <Box
+        sx={{
+          backgroundColor: '#1e2a38',
+          left: 0,
+          top: 0,
+          bottom: 0,
+          overflowY: 'auto'
+        }}
+      >
+        <Sidebar onNavigate={handleSidebarNavigate} />
       </Box>
 
-      <Grid container spacing={4}>
-        <Grid item xs={12} md={4}>
-          <Card sx={{ mb: 4 }}>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                Project Details
-              </Typography>
-              <Divider sx={{ my: 2 }} />
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="subtitle2" color="textSecondary">
-                  Description
-                </Typography>
-                <Typography variant="body1">
-                  {project.description || 'No description provided'}
-                </Typography>
-              </Box>
-              {project.status && (
-                <Box sx={{ mb: 2 }}>
-                  <Typography variant="subtitle2" color="textSecondary">
-                    Status
-                  </Typography>
-                  <Chip 
-                    label={project.status} 
-                    sx={{ mt: 1 }}
-                    color="primary"
-                  />
-                </Box>
-              )}
-              {project.startDate && (
-                <Box sx={{ mb: 2 }}>
-                  <Typography variant="subtitle2" color="textSecondary">
-                    Start Date
-                  </Typography>
-                  <Typography variant="body1">
-                    {new Date(project.startDate).toLocaleDateString()}
-                  </Typography>
-                </Box>
-              )}
-              {project.endDate && (
-                <Box sx={{ mb: 2 }}>
-                  <Typography variant="subtitle2" color="textSecondary">
-                    End Date
-                  </Typography>
-                  <Typography variant="body1">
-                    {new Date(project.endDate).toLocaleDateString()}
-                  </Typography>
-                </Box>
-              )}
+      {/* Main Content Area */}
+      <Box
+        sx={{
+          flexGrow: 1,
+          ml: '150px',
+          p: 3,
+        }}
+      >
+        <Container maxWidth="lg">
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 4 }}>
+            <IconButton 
+              onClick={handleBack} 
+              sx={{ mr: 2 }}
+              color="inherit"
+            >
+              <ArrowBackIcon />
+            </IconButton>
+            <Typography variant="h4" component="h1">
+              {project.name}
+            </Typography>
+          </Box>
 
-              {/* Image Upload Section */}
-              <Box sx={{ mt: 3 }}>
-                <Typography variant="subtitle2" color="textSecondary" gutterBottom>
-                  Project Image
-                </Typography>
-                {project.imageUrl && (
+          <Grid container spacing={4}>
+            <Grid item xs={12} md={4}>
+              <Card sx={{ mb: 4 }}>
+                <CardContent>
+                  <Typography variant="h6" gutterBottom>
+                    Project Details
+                  </Typography>
+                  <Divider sx={{ my: 2 }} />
                   <Box sx={{ mb: 2 }}>
-                    <img 
-                      src={project.imageUrl} 
-                      alt="Project" 
-                      style={{ 
-                        width: '100%', 
-                        borderRadius: '4px',
-                        marginBottom: '1rem' 
-                      }} 
-                    />
+                    <Typography variant="subtitle2" color="textSecondary">
+                      Description
+                    </Typography>
+                    <Typography variant="body1">
+                      {project.description || 'No description provided'}
+                    </Typography>
                   </Box>
-                )}
-                <Input 
-                  type="file" 
-                  onChange={handleFileSelect} 
-                  sx={{ mb: 1, width: '100%' }} 
-                />
-                <Button 
-                  onClick={handleUpload} 
-                  variant="contained" 
-                  color="primary" 
-                  fullWidth
-                >
-                  Upload Image
-                </Button>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
+                  {project.status && (
+                    <Box sx={{ mb: 2 }}>
+                      <Typography variant="subtitle2" color="textSecondary">
+                        Status
+                      </Typography>
+                      <Chip 
+                        label={project.status} 
+                        sx={{ mt: 1 }}
+                        color="primary"
+                      />
+                    </Box>
+                  )}
+                  {project.startDate && (
+                    <Box sx={{ mb: 2 }}>
+                      <Typography variant="subtitle2" color="textSecondary">
+                        Start Date
+                      </Typography>
+                      <Typography variant="body1">
+                        {new Date(project.startDate).toLocaleDateString()}
+                      </Typography>
+                    </Box>
+                  )}
+                  {project.endDate && (
+                    <Box sx={{ mb: 2 }}>
+                      <Typography variant="subtitle2" color="textSecondary">
+                        End Date
+                      </Typography>
+                      <Typography variant="body1">
+                        {new Date(project.endDate).toLocaleDateString()}
+                      </Typography>
+                    </Box>
+                  )}
 
-        <Grid item xs={12} md={8}>
-          <Paper sx={{ p: 3, mb: 4 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-              <Typography variant="h6">
-                Tasks
-              </Typography>
-              <Button
-                variant="contained"
-                color="primary"
-                startIcon={<AddIcon />}
-                onClick={handleClickOpen}
+                  {/* Image Upload Section */}
+                  <Box sx={{ mt: 3 }}>
+                    <Typography variant="subtitle2" color="textSecondary" gutterBottom>
+                      Project Image
+                    </Typography>
+                    {project.imageUrl && (
+                      <Box sx={{ mb: 2 }}>
+                        <img 
+                          src={project.imageUrl} 
+                          alt="Project" 
+                          style={{ 
+                            width: '100%', 
+                            borderRadius: '4px',
+                            marginBottom: '1rem' 
+                          }} 
+                        />
+                      </Box>
+                    )}
+                    <Input 
+                      type="file" 
+                      onChange={handleFileSelect} 
+                      sx={{ mb: 1, width: '100%' }} 
+                    />
+                    <Button 
+                      onClick={handleUpload} 
+                      variant="contained" 
+                      color="primary" 
+                      fullWidth
+                    >
+                      Upload Image
+                    </Button>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+
+            <Grid item xs={12} md={8}>
+              <Paper sx={{ p: 3, mb: 4 }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+                  <Typography variant="h6">
+                    Tasks
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    startIcon={<AddIcon />}
+                    onClick={handleClickOpen}
+                  >
+                    Add Task
+                  </Button>
+                </Box>
+                <List>
+                  {tasks.map(task => (
+                    <Paper 
+                      key={task.id} 
+                      sx={{ 
+                        mb: 2,
+                        '&:hover': {
+                          backgroundColor: 'rgba(0, 0, 0, 0.02)'
+                        }
+                      }}
+                    >
+                      <ListItem>
+                        <ListItemText
+                          primary={
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                              <Typography variant="subtitle1">{task.title}</Typography>
+                              <Chip
+                                label={task.status}
+                                size="small"
+                                sx={{
+                                  backgroundColor: getStatusColor(task.status),
+                                  color: 'white'
+                                }}
+                              />
+                            </Box>
+                          }
+                          secondary={task.description}
+                        />
+                      </ListItem>
+                    </Paper>
+                  ))}
+                  {tasks.length === 0 && (
+                    <Typography color="textSecondary" align="center">
+                      No tasks created yet
+                    </Typography>
+                  )}
+                </List>
+              </Paper>
+            </Grid>
+          </Grid>
+
+          <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+            <DialogTitle>Add New Task</DialogTitle>
+            <DialogContent sx={{ pt: 2 }}>
+              <TextField
+                autoFocus
+                label="Task Title"
+                fullWidth
+                required
+                value={newTask.title}
+                onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
+                sx={{ mb: 2 }}
+              />
+              <TextField
+                label="Description"
+                fullWidth
+                multiline
+                rows={3}
+                value={newTask.description}
+                onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
+                sx={{ mb: 2 }}
+              />
+              <TextField
+                select
+                label="Status"
+                fullWidth
+                value={newTask.status}
+                onChange={(e) => setNewTask({ ...newTask, status: e.target.value })}
+                SelectProps={{
+                  native: true,
+                }}
               >
+                <option value="To Do">To Do</option>
+                <option value="In Progress">In Progress</option>
+                <option value="Done">Done</option>
+              </TextField>
+            </DialogContent>
+            <DialogActions sx={{ px: 3, pb: 2 }}>
+              <Button onClick={handleClose}>Cancel</Button>
+              <Button onClick={handleCreate} variant="contained" color="primary">
                 Add Task
               </Button>
-            </Box>
-            <List>
-              {tasks.map(task => (
-                <Paper 
-                  key={task.id} 
-                  sx={{ 
-                    mb: 2,
-                    '&:hover': {
-                      backgroundColor: 'rgba(0, 0, 0, 0.02)'
-                    }
-                  }}
-                >
-                  <ListItem>
-                    <ListItemText
-                      primary={
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                          <Typography variant="subtitle1">{task.title}</Typography>
-                          <Chip
-                            label={task.status}
-                            size="small"
-                            sx={{
-                              backgroundColor: getStatusColor(task.status),
-                              color: 'white'
-                            }}
-                          />
-                        </Box>
-                      }
-                      secondary={task.description}
-                    />
-                  </ListItem>
-                </Paper>
-              ))}
-              {tasks.length === 0 && (
-                <Typography color="textSecondary" align="center">
-                  No tasks created yet
-                </Typography>
-              )}
-            </List>
-          </Paper>
-        </Grid>
-      </Grid>
+            </DialogActions>
+          </Dialog>
 
-      <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-        <DialogTitle>Add New Task</DialogTitle>
-        <DialogContent sx={{ pt: 2 }}>
-          <TextField
-            autoFocus
-            label="Task Title"
-            fullWidth
-            required
-            value={newTask.title}
-            onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
-            sx={{ mb: 2 }}
-          />
-          <TextField
-            label="Description"
-            fullWidth
-            multiline
-            rows={3}
-            value={newTask.description}
-            onChange={(e) => setNewTask({ ...newTask, description: e.target.value })}
-            sx={{ mb: 2 }}
-          />
-          <TextField
-            select
-            label="Status"
-            fullWidth
-            value={newTask.status}
-            onChange={(e) => setNewTask({ ...newTask, status: e.target.value })}
-            SelectProps={{
-              native: true,
-            }}
-          >
-            <option value="To Do">To Do</option>
-            <option value="In Progress">In Progress</option>
-            <option value="Done">Done</option>
-          </TextField>
-        </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={handleClose}>Cancel</Button>
-          <Button onClick={handleCreate} variant="contained" color="primary">
-            Add Task
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={handleCloseSnackbar}>
-        <Alert onClose={handleCloseSnackbar} severity={message.severity}>
-          {message.text}
-        </Alert>
-      </Snackbar>
-    </Container>
+          <Snackbar open={openSnackbar} autoHideDuration={6000} onClose={handleCloseSnackbar}>
+            <Alert onClose={handleCloseSnackbar} severity={message.severity}>
+              {message.text}
+            </Alert>
+          </Snackbar>
+        </Container>
+      </Box>
+    </Box>
   );
 };
 
