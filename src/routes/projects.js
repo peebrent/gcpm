@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const { Project } = require('../models/Project');
-// const auth = require('../middleware/auth');
+const auth = require('../middleware/auth');
 const multer = require('multer');
 const path = require('path');
 
 // Get all projects
-router.get('/', async (req, res) => {  // Removed auth
+router.get('/', auth,async (req, res) => { 
   try {
     const projects = await Project.findAll({
       order: [['createdAt', 'DESC']] // Optional: Order by creation date, newest first
@@ -18,8 +18,46 @@ router.get('/', async (req, res) => {  // Removed auth
   }
 });
 
+// Delete project
+router.delete('/:id', auth, async (req, res) => {
+  try {
+    console.log('Delete request for project ID:', req.params.id);
+    console.log('User ID from token:', req.user.id);
+
+    const project = await Project.findOne({
+      where: {
+        id: req.params.id,
+        userId: req.user.id // Ensure user owns the project
+      }
+    });
+
+    if (!project) {
+      console.log('Project not found or unauthorized');
+      return res.status(404).json({ msg: 'Project not found or unauthorized' });
+    }
+
+    console.log('Found project:', project);
+
+    try {
+      await project.destroy();
+      console.log('Project successfully deleted');
+      res.json({ msg: 'Project deleted successfully' });
+    } catch (destroyError) {
+      console.error('Error during project deletion:', destroyError);
+      throw destroyError;
+    }
+
+  } catch (error) {
+    console.error('Server error in delete route:', error);
+    res.status(500).json({ 
+      msg: 'Server error',
+      error: error.message 
+    });
+  }
+});
+
 // Get a single project by ID
-router.get('/:id', async (req, res) => {  // Removed auth
+router.get('/:id', auth, async (req, res) => { 
   try {
     const project = await Project.findOne({
       where: { id: req.params.id },  // Removed ownerId check
@@ -60,7 +98,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // Create a new project
-router.post('/', async (req, res) => {  // Removed auth
+router.post('/', auth, async (req, res) => { 
   try {
     const { name, description, status, startDate, endDate } = req.body;
     
@@ -101,7 +139,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 // Route to handle image upload for a project
-router.post('/:id/image', upload.single('image'), async (req, res) => {  // Removed auth
+router.post('/:id/image', auth, upload.single('image'), async (req, res) => { 
   try {
     const project = await Project.findOne({
       where: { id: req.params.id },  // Removed ownerId check

@@ -47,7 +47,7 @@ const ProjectList = ({ token }) => {
   const navigate = useNavigate();
   const [projects, setProjects] = useState([]);
   const [open, setOpen] = useState(false);
-  const [newProject, setNewProject] = useState({ name: '', description: '' });
+  const [newProject, setNewProject] = useState({ name: '', address: '', description: '' });
   const [message, setMessage] = useState({ text: '', severity: 'success' });
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -82,12 +82,16 @@ const ProjectList = ({ token }) => {
 
   const handleClose = () => {
     setOpen(false);
-    setNewProject({ name: '', description: '' });
+    setNewProject({ name: '', address: '',description: '' });
   };
 
   const handleCreate = async () => {
     try {
-      const response = await api.post('/api/projects', newProject, {
+      const response = await api.post('/api/projects', {
+        name: newProject.name,
+        address: newProject.address,
+        description: newProject.description
+      }, {
         headers: { 'x-auth-token': token }
       });
       console.log('Project creation response:', response);
@@ -114,15 +118,23 @@ const ProjectList = ({ token }) => {
   const handleDelete = async (projectId, event) => {
     event.stopPropagation();
     try {
-      await api.delete(`/api/projects/${projectId}`, {
+      console.log('Deleting project:', projectId);
+      const response = await api.delete(`/api/projects/${projectId}`, {
         headers: { 'x-auth-token': token }
       });
-      fetchProjects();
-      setMessage({ text: 'Project deleted successfully!', severity: 'success' });
-      setOpenSnackbar(true);
+      console.log('Delete response:', response);
+      
+      if (response.status === 200) {
+        fetchProjects();
+        setMessage({ text: 'Project deleted successfully!', severity: 'success' });
+      } else {
+        throw new Error('Failed to delete project');
+      }
     } catch (error) {
-      console.error('Failed to delete project:', error);
-      setMessage({ text: 'Failed to delete project. Please try again.', severity: 'error' });
+      console.error('Delete project error:', error.response || error);
+      const errorMessage = error.response?.data?.msg || 'Failed to delete project';
+      setMessage({ text: errorMessage, severity: 'error' });
+    } finally {
       setOpenSnackbar(true);
     }
   };
@@ -291,6 +303,13 @@ const ProjectList = ({ token }) => {
             required
             value={newProject.name}
             onChange={(e) => setNewProject({ ...newProject, name: e.target.value })}
+            sx={{ mb: 2 }}
+          />
+          <TextField
+            label="Project Address"
+            fullWidth
+            value={newProject.address}
+            onChange={(e) => setNewProject({ ...newProject, address: e.target.value })}
             sx={{ mb: 2 }}
           />
           <TextField

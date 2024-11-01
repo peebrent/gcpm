@@ -47,18 +47,31 @@ const AccountSettings = ({ token }) => {
 
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
+    
+    // Basic validation
+    if (!user.name.trim() || !user.email.trim()) {
+      showMessage('Name and email are required', 'error');
+      return;
+    }
+
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(user.email)) {
+      showMessage('Please enter a valid email address', 'error');
+      return;
+    }
+
     try {
       const response = await api.put('/api/users/me', {
         name: user.name,
         email: user.email
-      }, {
-        headers: { 'x-auth-token': token }
       });
       setUser(response.data);
       showMessage('Profile updated successfully', 'success');
     } catch (error) {
-      console.error('Failed to update profile:', error);
-      showMessage('Failed to update profile', 'error');
+      const errorMessage = error.response?.data?.msg || 'Failed to update profile';
+      console.error('Failed to update profile:', error.response?.data || error.message);
+      showMessage(errorMessage, 'error');
     }
   };
 

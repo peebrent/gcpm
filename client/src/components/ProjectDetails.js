@@ -29,6 +29,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import AddIcon from '@mui/icons-material/Add';
 import MuiAlert from '@mui/material/Alert';
 import Sidebar from './Sidebar';
+import TimelineProgress from './TimelineProgress';
 
 const Alert = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
@@ -72,6 +73,20 @@ const ProjectDetails = ({ token }) => {
     } catch (error) {
       console.error('Failed to fetch tasks:', error);
       showMessage('Failed to fetch tasks', 'error');
+    }
+  };
+
+  const handleDatesChange = async (dates) => {
+    try {
+      await axios.put(`/api/projects/${projectId}`, 
+        { ...project, startDate: dates.startDate, endDate: dates.endDate },
+        { headers: { 'x-auth-token': token } }
+      );
+      fetchProjectDetails();
+      showMessage('Project dates updated successfully', 'success');
+    } catch (error) {
+      console.error('Failed to update project dates:', error);
+      showMessage('Failed to update project dates', 'error');
     }
   };
 
@@ -201,7 +216,13 @@ const ProjectDetails = ({ token }) => {
               {project.name}
             </Typography>
           </Box>
-
+          <TimelineProgress 
+          projectDates={{
+            startDate: project.startDate,
+            endDate: project.endDate
+          }}
+          onDatesChange={handleDatesChange}
+        />
           <Grid container spacing={4}>
             <Grid item xs={12} md={4}>
               <Card sx={{ mb: 4 }}>

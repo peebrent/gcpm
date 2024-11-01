@@ -9,9 +9,11 @@ const path = require('path');
 const uploadRoutes = require('./routes/upload');
 const app = express();
 const authRoutes = require('./routes/auth');
-console.log('JWT_SECRET:', process.env.JWT_SECRET);
-// Middleware
+const userRoutes = require('./routes/users');
 
+console.log('JWT_SECRET:', process.env.JWT_SECRET);
+
+// Middleware
 app.use(cors());
 app.use(helmet());
 app.use(express.json());

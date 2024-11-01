@@ -10,19 +10,23 @@ import FolderIcon from '@mui/icons-material/Folder';
 import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
 import PeopleIcon from '@mui/icons-material/People';
 import SettingsIcon from '@mui/icons-material/Settings';
+import { useLocation } from 'react-router-dom';
 
 const Sidebar = ({ onNavigate }) => {
+  const location = useLocation();
+  const isProjectDetails = location.pathname.includes('/projects/');
+
   const menuItems = [
-    { text: 'Home', icon: <HomeIcon /> },
-    { text: 'Schedule', icon: <CalendarTodayIcon /> },
-    { text: 'Analysis', icon: <TimelineIcon /> },
-    { text: 'Tasks', icon: <AssignmentIcon /> },
-    { text: 'Field Reports', icon: <DescriptionIcon /> },
-    { text: 'Review', icon: <RateReviewIcon /> },
-    { text: 'Documents', icon: <FolderIcon /> },
-    { text: 'RFIs', icon: <QuestionAnswerIcon /> },
-    { text: 'People', icon: <PeopleIcon /> },
-    { text: 'Settings', icon: <SettingsIcon /> },
+    { text: 'Home', icon: <HomeIcon />, path: 'home' },
+    { text: 'Schedule', icon: <CalendarTodayIcon />, path: 'schedule' },
+    { text: 'Analysis', icon: <TimelineIcon />, path: 'analysis' },
+    { text: 'Tasks', icon: <AssignmentIcon />, path: 'tasks' },
+    { text: 'Field Reports', icon: <DescriptionIcon />, path: 'field-reports' },
+    { text: 'Review', icon: <RateReviewIcon />, path: 'review' },
+    { text: 'Documents', icon: <FolderIcon />, path: 'documents' },
+    { text: 'RFIs', icon: <QuestionAnswerIcon />, path: 'rfis' },
+    { text: 'People', icon: <PeopleIcon />, path: 'people' },
+    { text: 'Settings', icon: <SettingsIcon />, path: 'settings' },
   ];
 
   return (
@@ -30,8 +34,8 @@ const Sidebar = ({ onNavigate }) => {
       sx={{
         width: '150px',
         height: '100%',
-        backgroundColor: '#1e2a38',
-        color: '#a1a9b8',
+        backgroundColor: '#fff',
+        color: '#666666',
         position: 'absolute',
         left: 0,
         top: 0,
@@ -57,22 +61,23 @@ const Sidebar = ({ onNavigate }) => {
             button
             key={item.text}
             onClick={() => onNavigate(item.text.toLowerCase())}
+            selected={item.text === 'Home' && isProjectDetails}
             sx={{
               '&:hover': {
-                backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                backgroundColor: 'rgba(0, 133, 222)',
                 color: '#ffffff',
                 '& .MuiListItemIcon-root': {
                   color: '#ffffff',
                 },
               },
               '&.Mui-selected': {
-                backgroundColor: 'rgba(255, 255, 255, 0.12)',
+                backgroundColor: 'rgba(0, 133, 222)',
                 color: '#ffffff',
                 '& .MuiListItemIcon-root': {
                   color: '#ffffff',
                 },
                 '&:hover': {
-                  backgroundColor: 'rgba(255, 255, 255, 0.16)',
+                  backgroundColor: 'rgba(0, 133, 222, 0.9)',
                 },
               },
             }}
